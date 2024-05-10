@@ -1,5 +1,5 @@
 body {
-  background: rgb(124, 187, 187);
+  background: rgb(227 240 250);
   margin: 0;
   padding: 0;
 }
@@ -33,11 +33,10 @@ body {
 
 
 
+.todoApp input:focus {
+  outline: none;
+}
 
-
-
-.todolist_2 {
-  /* background: pink; */
-  padding: 1rem 1rem 1.5rem;
-  width: max-content;
+.todoApp input::placeholder {
+  font-style: italic;
 }

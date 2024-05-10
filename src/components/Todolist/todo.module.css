@@ -1,0 +1,12 @@
+.todo {
+    margin-left: 5rem;
+    flex-direction: column;
+    width: max-content;
+    display: flex;
+    position: relative;
+    font-family: "Jost", sans-serif;
+
+    min-width: 17rem;
+    max-width: 25rem;
+    
+}

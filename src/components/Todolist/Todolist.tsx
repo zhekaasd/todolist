@@ -1,34 +1,55 @@
 import React, { useState, ChangeEvent, KeyboardEvent, MouseEventHandler, DetailedHTMLProps, HTMLAttributes } from 'react';
 import { TaskType } from '../../App';
 import { CustomDefaultButton } from '../assets/button/CustomDefaultButton';
+import styles from './todolist.module.css';
 
 type TodolistPropsType = {
     title: string
     tasks: TaskType[]
     removeTask: (id: string) => void
     addTask: (title: string) => void
-    filtered: (value: string) => void
+    filtered: (value: 'all' | 'completed' | 'active') => void
+}
+
+const getDateAndTime = (item: string) => {
+    const array = item.split(',').map(el => el.trim());
+    let date = array[0];
+    let time = array[1].split(':');
+
+    date = date.split('.').map( el => el.length > 2 ? el.split('').filter((element,i) => i > 1).join('') : el).join('/');
+    time.length = 2;
+    
+    return [date, time.join(':')];
 }
 
 function Todolist(props: TodolistPropsType) {
     
-    const [popup, setPopup] = useState(true);
+// Диструктуризация пропсов    
+const {title, tasks, removeTask, addTask, filtered} = props;
 
-    const [collapsed, setCollapsed] = useState(false);
+// Состояние модального окна при добавлении таски
+    const [popup, setPopup] = useState(false);
 
-    const {title, tasks, removeTask, addTask, filtered} = props;
+// Состояние тудулиста свёрнут или нет
+    const [collapsed, setCollapsed] = useState(true);
 
+// Состояние со значением в инпуте
     const [inputValue, setInputValue] = useState('');
 
+// Подписка на изменение состояние в инпуте и обновления состояния
     const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
         setInputValue(e.currentTarget.value);
     }
 
+// Добавление новой таски по клику, очистка инпута и закрытие модального окна
     const onClickHandler = () => {
         addTask(inputValue);
         setInputValue('');
+        setPopup(false);
     };
 
+
+// Добавление новой таски при сочитании клавиш, очистка инпута и закрытие модального окна
     const onKeyPressHandler = (e: KeyboardEvent<HTMLInputElement>) => {
         if(e.key === 'Enter' && e.shiftKey) {
             onClickHandler();
@@ -38,6 +59,13 @@ function Todolist(props: TodolistPropsType) {
     const filteredTaskHandler = (value: 'all' | 'active' | 'completed' ) => {
         filtered(value);
     }
+
+    const [date, time] = getDateAndTime(new Date().toLocaleString());
+
+    
+
+    console.log(date);
+    
 
   return (
 
@@ -49,19 +77,26 @@ function Todolist(props: TodolistPropsType) {
 {/* ------------------------------------------------------------------ */}
 
     {
-        !popup ? <div className='todolist_2' style={{marginTop: '50px', borderRadius: '1rem', position: 'relative'}}>
-        <div style={{zIndex: '10', position: 'relative', borderBottom: '1px solid grey', borderTopLeftRadius: '.5rem', borderTopRightRadius: '.5rem', padding: '1rem 1rem', background: '#f1e7ff', display: 'flex', columnGap: '3rem', alignItems: 'center', justifyContent: 'space-between'}}>
-            <div>
-                <h2 style={{letterSpacing: '-2px', fontSize: '1.5rem', margin: 0}}>
+        !popup ? <div className={styles.todolist}>
+
+        <div className={styles.todolist__header}>
+            <div className={styles.todolist__header_description}>
+                <h2 className={styles.title}>
                     {title}
                 </h2>
-                <span style={{display: 'block', marginTop: '8px', padding: '0', lineHeight: '1', fontStyle: 'italic', fontSize: '12px', color: 'black', opacity: .35}}>
+                <span className={styles.date}>
                     {new Date().toDateString()}
                 </span>
             </div>
-            {
-                collapsed ? <div style={{fontSize: '12px'}}>count tasks</div> : <div style={{fontSize: '12px', background: 'darkred', color: 'wheat'}}>count tasks</div> 
-            }
+            {/* ❌ */}
+
+            <div className={styles.todolist__header_dynamic_data}> 
+                {
+                    collapsed ? <span>✍️</span>  : `12323 ${tasks.length} tasks`
+                } 
+            </div>
+
+
             
         </div>
 
@@ -72,17 +107,13 @@ function Todolist(props: TodolistPropsType) {
         {/* </div> */}
 
         {
-            collapsed && <button style={{
-                zIndex: '11', display: 'inline-block', 
-                width: '36px', height: '36px', 
-                borderRadius: '50%', 
-                position: 'absolute', right: '2rem', top: '80px'}} onClick={() => setPopup(true)}
+            collapsed && <button className={styles.button__plus}  onClick={() => setPopup(true)}
                 
             >+</button> 
         }
 
         {
-            collapsed && <ul style={{listStyle: 'none', paddingLeft: '0', margin: '0', paddingTop: '1rem', background: 'rgb(205, 194, 221)'}}>
+            collapsed && <ul className={styles.todolist__list_tasks}>
             {
                 tasks.map((task) => {
 
@@ -90,14 +121,19 @@ function Todolist(props: TodolistPropsType) {
                         removeTask(task.id);
                     }
                     
-                return <li key={task.id} style={{padding: '1rem', borderBottom: '1px solid rgba(140,140,140,.5)', background: '#cdc2dd', display: 'flex', justifyContent: 'space-between'}} >
-                    <div>
+                return <li className={styles.task} key={task.id}>
+                    <div className={styles.task__title}>
                         
                         <input type="checkbox" checked={task.isDone} />
-                        <span style={{display: 'inline-block', margin: '0 10px'}}>{task.title}</span>
+                        <span >{task.title}</span>
                     </div>
                     
-                    <span style={{display: 'inline-block', fontSize: '10px'}}>{task.title}</span>
+                    <span className={styles.task__date} >
+                        {/* {task.title} */}
+                        {/* {date} */}
+                        16 Apr
+                        <span >{time}</span>
+                    </span>
                     
                     {/* <CustomDefaultButton onClick={removeTaskHandler} styleType='smallSize'>x</CustomDefaultButton> */}
                     {/* <button onClick={removeTaskHandler}>x</button> */}
@@ -105,6 +141,7 @@ function Todolist(props: TodolistPropsType) {
             }
         </ul>
         }
+        
         {/* <div style={{marginBottom: '1rem'}}> */}
 
             {/* <CustomDefaultButton onClick={() => filteredTaskHandler('all')} >all</CustomDefaultButton> */}
@@ -112,18 +149,29 @@ function Todolist(props: TodolistPropsType) {
 
              {/* <CustomDefaultButton onClick={() => filteredTaskHandler('completed')}>completed</CustomDefaultButton> */}
         {/* </div> */}
-        <div style={{zIndex: '5', background: '#f1e7ff', padding: '1rem 1rem .5rem', position: 'relative', top: !collapsed ? '-26px' : '0'}}>
+        {/* <div style={{zIndex: '5', background: '#f1e7ff', padding: '1rem 1rem .5rem', position: 'relative', top: !collapsed ? '-26px' : '0'}}>
             
-        </div>
-        <div onClick={() => setCollapsed(!collapsed)} style={{zIndex: '11' ,width: '30px', height: '30px', borderRadius: '50%', background: 'darkgreen', textAlign: 'center', position: 'absolute', left: '50%', transform: 'translate(-50%, 0)', bottom: !collapsed ? '2rem' : '.5rem'}}>
+        </div> */}
+        {/* <div onClick={() => setCollapsed(!collapsed)} style={{zIndex: '11' ,width: '30px', height: '30px', borderRadius: '50%', background: 'darkgreen', textAlign: 'center', position: 'absolute', left: '50%', transform: 'translate(-50%, 0)', bottom: !collapsed ? '2rem' : '.5rem'}}>
                     {collapsed ? '🔺' : '🔻'}
+        </div> */}
+        <div className={styles.todolist__icon_arrow} onClick={() => setCollapsed(!collapsed)} >
+                    {
+                        collapsed
+                            ? <i className={`bx bxs-chevron-down ${styles.icon__arrow_up}`}></i> 
+                                : <i className='bx bxs-chevron-down'></i>}
         </div>
-    </div> : <div onClick={(e) => setPopup(false) } style={{zIndex: 50, background: 'black', height: '100%', position: 'absolute', width: '100%', top: '0', left: '0', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    
+    </div> 
+
+// popup part2
+
+    : <div onClick={(e) => setPopup(false) } className={styles.todolist__modal_window} >
         
 
-        <div onClick={(e) => {e.stopPropagation()}} style={{position: 'relative', background: 'white', width: '40%', height: '30ppx', display: 'flex', justifyContent: 'center', flexDirection: 'column', padding: '1rem 1rem .5rem', borderRadius: '1rem'}}>
+        <div onClick={(e) => {e.stopPropagation()}} className={styles.modal__form}>
             
-            <div onClick={() => setPopup(false)} style={{background: 'white', color: 'black', fontWeight: '600' ,padding: '.25rem', position: 'absolute', lineHeight: '1', right: '0', top: '-2.5rem'}}>x</div>
+            <div onClick={() => setPopup(false)} className={styles.modal__closed}>x</div>
             
             <div style={{position: 'relative'}}>
                 
@@ -144,23 +192,23 @@ function Todolist(props: TodolistPropsType) {
 
             <label style={{width: '100%', marginBottom: '1.5rem'}}>
                 <p style={{margin: '0 0 .5rem', fontSize: '12px'}}>Title</p>
-                <input style={{width: '-webkit-fill-available', padding: '.25rem .5rem'}} type="text" />
+                <input onChange={onChangeHandler} style={{width: '-webkit-fill-available', padding: '.25rem .5rem'}} type="text" />
             </label>
 
-            <label style={{width: '100%', marginBottom: '1.5rem'}}>
+            {/* <label style={{width: '100%', marginBottom: '1.5rem'}}>
                 <p style={{margin: '0 0 .5rem', fontSize: '12px'}}>Status</p>
                 <select style={{width: '100%', padding: '.25rem .5rem'}} name="" id="">
                     <option value="true">true</option>
                     <option value="false">false</option>
                 </select>
-            </label>
+            </label> */}
             
 
 
 
             <div style={{margin: '.5rem 0 .5rem'}}>
                 
-                <button style={{padding: '.2rem 1rem', marginRight: '1.5rem'}}>send</button>
+                <button onClick={onClickHandler} style={{padding: '.2rem 1rem', marginRight: '1.5rem'}}>send</button>
                 <button style={{padding: '.2rem 1rem', }} onClick={() => setPopup(false)}>cancel</button>
             </div>
         </div>
