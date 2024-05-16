@@ -12,9 +12,9 @@ export type TaskType = {
   isDone: boolean
 };
 
-const randomColor = () => {
+export const randomColor = () => {
   const arr = ['red', 'blue', 'yellow', 'orange', 'purple', 'tomato', 'pink', 'green', 'azure', 'aqua', 'gold'];
-  return arr[Math.floor(Math.random() * 5)];
+  return arr[Math.floor(Math.random() * 10)];
 }
 
 function App() {
@@ -107,6 +107,7 @@ function App() {
                  tasks={tasks}
                  removeTask={removeTask}
                  addTask={addTask}
+                 filter={filter}
       />
       {/* <Todolist title='What to buy' tasks={tasks2} /> */}
 

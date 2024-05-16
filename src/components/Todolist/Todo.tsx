@@ -1,5 +1,5 @@
 import React, {ChangeEvent, useState, KeyboardEvent } from 'react'
-import { TaskType } from '../../App'
+import { TaskType, randomColor } from '../../App'
 import { CustomDefaultButton } from '../assets/button/CustomDefaultButton';
 
 import styles from './todo.module.css';
@@ -10,15 +10,14 @@ type TodoPropsType = {
     removeTask: (id: string) => void
     addTask: (title: string) => void
     filtered: (value: 'all' | 'completed' | 'active') => void
+    filter: 'all' | 'completed' | 'active'
 }
 
 export default function Todo(props: TodoPropsType) {
 
-    const [popup, setPopup] = useState(true);
+    const [popup, setPopup] = useState(false);
 
-    const [collapsed, setCollapsed] = useState(false);
-
-    const {title, tasks, removeTask, addTask, filtered} = props;
+    const {title, tasks, removeTask, addTask, filtered, filter} = props;
 
     const [inputValue, setInputValue] = useState('');
 
@@ -29,6 +28,7 @@ export default function Todo(props: TodoPropsType) {
     const onClickHandler = () => {
         addTask(inputValue);
         setInputValue('');
+        setPopup(false);
     };
 
     const onKeyPressHandler = (e: KeyboardEvent<HTMLInputElement>) => {
@@ -39,6 +39,7 @@ export default function Todo(props: TodoPropsType) {
 
     const filteredTaskHandler = (value: 'all' | 'active' | 'completed' ) => {
         filtered(value);
+
     }
 
     const date = new Date().toLocaleString().split(', ');
@@ -50,69 +51,63 @@ export default function Todo(props: TodoPropsType) {
         
         {/* --- date todo block --- */}
         
-                <div style={{color: '#a7a0f3', padding: '1rem', background: 'white', display: 'flex', justifyContent: 'space-between'}}>
+                <div className={styles.todo__header}>
                     {/* <span>remove todo</span> */}
-                    <i style={{fontSize: '1.25rem', color: 'darkgray'}} className='bx bxs-trash-alt'></i>
-                    <span style={{ fontSize: '.65rem', color: 'darkgray', fontStyle: 'italic', cursor: 'default'}}>
-                            <p style={{margin: '0', padding: '0'}}>{date[0]}</p>
-                            <p style={{margin: '0', padding: '0', textAlign: 'end'}}>{date[1]}</p>
-                            {/* Thursday, 23 August 2018 */}
+                    <i onClick={() => alert('remove this todo')} className='bx bxs-trash-alt'></i>
+                    <span >
+                            {/* <p >{date[0]}</p> */}
+                            {/* <p>{date[1]}</p> */}
+                            <p>Thursday</p>
+                            <p>23 August 2018</p>
+                             
                     </span>
                 </div>
         
         {/* --- main block todo --- */}
-                <div style={{background: 'white', padding: '0 1rem'}}>
-                    <div style={{textAlign: 'center', margin: '1.5rem .5rem .5rem'}}>
-                        <h2 style={{fontWeight: '500', margin: '0', padding: '0', color: '#f3214f'}}>
+                <div className={styles.todo__main} >
+                    <h2 className={styles.todo__title} style={{color: randomColor()}}>
                             {/* {title} */}
                             To do List
-                        </h2>
-        
+                    </h2>
+                    <div className={styles.todo__filtered} >
+                        <span onClick={() => filteredTaskHandler('all')} className={filter === 'all' ? styles.todo__filtered_active : ''}>all</span>
+                        <span onClick={() => filteredTaskHandler('active')} className={filter === 'active' ? styles.todo__filtered_active : ''}>active</span>
+                        <span onClick={() => filteredTaskHandler('completed')} className={filter === 'completed' ? styles.todo__filtered_active : ''}>done</span>
                     </div>
-                    <div style={{margin: '0 auto 2rem auto', display: 'flex', justifyContent: 'space-around', fontSize: '.75rem', width: '90%', color: 'darkgray', textTransform: 'uppercase', fontWeight: '500'}}>
-                        <span style={{color: 'black'}}>all</span><span>active</span><span>done</span>
-                    </div>
-                    
-                <ul style={{listStyleType: 'none', margin: '0', padding: '0', marginBottom: '2.25rem'}}>
+                </div>
+
+                                    
+                <ul className={styles.todo__list_tasks} >
                     {tasks.map((task) => {
         
-                            const removeTaskHandler = () => {removeTask(task.id);} 
+                        const removeTaskHandler = () => {removeTask(task.id);} 
                             
-                         return <li key={task.id} style={{padding: '.25rem 1.5rem', marginBottom: '.5rem', borderRadius: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}> 
-                                <div>
-                                    <input style={{marginRight: '1.25rem'}} type="checkbox"  />
-                                    <span style={{fontSize: '1.15rem', fontWeight: '500'}}>{task.title} </span>
+                         return <li key={task.id} className={styles.item}>
+
+                                <div className={styles.item__title}>
+                                    <input checked={task.isDone} type="checkbox" />
+                                    <span >{task.title} </span>
                                 </div>
                                 <i onClick={removeTaskHandler} className='bx bx-x'></i>
         
                         </li>})}
                 </ul>
-                    </div>
         
         
-                <div onClick={() => setPopup(true)} style={{
-                        position: 'absolute', cursor: 'pointer', 
-                        bottom: '-.65rem', left: '50%', 
-                        transform: 'translate(-50%, 0)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        height: '1.25rem', width: '1.25rem', background: 'white',
-                }}>
-                    
-                        <i style={{fontSize: '2.25rem', color: '#f3214f'}} className='bx bxs-plus-circle' ></i>
-                    </div> 
+                <div className={styles.todo__add_item_button} onClick={() => setPopup(true)} >
+                    <i className='bx bxs-plus-circle' ></i>
+                </div> 
                 
             </div>
 
             {
-                popup && <div onClick={(e) => setPopup(false)}  style={{position: 'absolute', width: '100%', height: '100%',
-                                    background: 'rgba(0,0,0,.45)', zIndex: '11', top: '0', left: '0',
-                                    display: 'flex', flexDirection: 'column', 
-                        }}>
-                    <div onClick={(e) => e.stopPropagation()} style={{height: '200px', width: '350px', background: 'white',  padding: '1rem'}}>
+                popup && <div onClick={(e) => setPopup(false)} className={styles.popup}>
+                    <div onClick={(e) => e.stopPropagation()} className={styles.window} >
                         <p>text</p>
-                        <input type="text" />
-                        <div style={{marginTop: '2rem', textAlign: 'end'}}>
-                            <span onClick={() => setPopup(false)} style={{marginRight: '1rem'}}>cancel</span><span>send</span>
+                        <input value={inputValue} onChange={onChangeHandler} placeholder='task text..' type="text" />
+                        <div className={styles.buttons__block}>
+                            <span className={styles.close} onClick={() => setPopup(false)}>cancel</span>
+                            <span onClick={onClickHandler}>send</span>
                         </div>
                     </div>
                 </div>
